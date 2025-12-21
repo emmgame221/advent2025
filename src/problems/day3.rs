@@ -11,30 +11,14 @@ pub fn print_solution() {
     println!("Day 3 Part 2: {}", part2);
 }
 
-fn part1(lines: &Vec<String>) -> u32 {
+fn part1(lines: &Vec<String>) -> u64 {
     let mut total = 0;
     for line in lines {
         let bank: Vec<_> = line.chars().map(|x| x.to_digit(10).unwrap()).collect();
         //println!("{:?}", bank);
-        total += largest_joltage_v1(&bank);
+        total += largest_joltage(&bank, 2);
     }
     total
-}
-
-fn largest_joltage_v1(bank: &Vec<u32>) -> u32 {
-    let mut joltage = 0;
-    for i in 0..bank.len() - 1 {
-        for j in i + 1..bank.len() {
-            let dig1 = bank[i];
-            let dig2 = bank[j];
-            let val = (dig1.to_string() + &dig2.to_string()).parse().unwrap();
-            if val > joltage {
-                joltage = val
-            }
-        }
-    }
-    //println!("joltage: {}", joltage);
-    joltage
 }
 
 fn part2(lines: &Vec<String>) -> u64 {
@@ -42,13 +26,12 @@ fn part2(lines: &Vec<String>) -> u64 {
     for line in lines {
         let bank: Vec<_> = line.chars().map(|x| x.to_digit(10).unwrap()).collect();
         //println!("{:?}", bank);
-        total += largest_joltage_v2(&bank);
+        total += largest_joltage(&bank, 12);
     }
     total
 }
 
-fn largest_joltage_v2(bank: &Vec<u32>) -> u64 {
-    let final_length = 12usize;
+fn largest_joltage(bank: &Vec<u32>, final_length: usize) -> u64 {
     let mut ons: Vec<u32> = Vec::new();
     let mut last_id = 0;
     while ons.len() < final_length {
