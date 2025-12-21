@@ -48,60 +48,31 @@ fn part2(lines: &Vec<String>) -> u64 {
 }
 
 fn largest_joltage_v2(bank: &Vec<u32>) -> u64 {
-    let mut joltage = 0;
-    for a in 0..bank.len() - 1 {
-        for b in a + 1..bank.len() {
-            for c in b + 1..bank.len() {
-                for d in c + 1..bank.len() {
-                    for e in d + 1..bank.len() {
-                        for f in e + 1..bank.len() {
-                            for g in f + 1..bank.len() {
-                                for h in g + 1..bank.len() {
-                                    for i in h + 1..bank.len() {
-                                        for j in i + 1..bank.len() {
-                                            for k in j + 1..bank.len() {
-                                                for l in k + 1..bank.len() {
-                                                    let dig1 = bank[a];
-                                                    let dig2 = bank[b];
-                                                    let dig3 = bank[c];
-                                                    let dig4 = bank[d];
-                                                    let dig5 = bank[e];
-                                                    let dig6 = bank[f];
-                                                    let dig7 = bank[g];
-                                                    let dig8 = bank[h];
-                                                    let dig9 = bank[i];
-                                                    let dig10 = bank[j];
-                                                    let dig11 = bank[k];
-                                                    let dig12 = bank[l];
-                                                    let val = (dig1.to_string()
-                                                        + &dig2.to_string()
-                                                        + &dig3.to_string()
-                                                        + &dig4.to_string()
-                                                        + &dig5.to_string()
-                                                        + &dig6.to_string()
-                                                        + &dig7.to_string()
-                                                        + &dig8.to_string()
-                                                        + &dig9.to_string()
-                                                        + &dig10.to_string()
-                                                        + &dig11.to_string()
-                                                        + &dig12.to_string())
-                                                        .parse()
-                                                        .unwrap();
-                                                    if val > joltage {
-                                                        joltage = val
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    let final_length = 12usize;
+    let mut ons: Vec<u32> = Vec::new();
+    let mut last_id = 0;
+    while ons.len() < final_length {
+        let slice = &bank[last_id..(bank.len() + 1 - (final_length - ons.len()))];
+        //println!("slice: {:?}", slice);
+        let (max, id) = find_max(slice);
+        last_id += id + 1;
+        ons.push(max);
+    }
+    //println!("bank: {:?}", bank);
+    //println!("ons: {:?}", ons);
+    ons.iter().fold(String::new(), |acc, x| {
+        acc + &x.to_string()
+    }).parse().unwrap()
+}
+
+fn find_max(slice: &[u32]) -> (u32, usize) {
+    let mut max = 0;
+    let mut maxid = 0;
+    for i in 0..slice.len() {
+        if slice[i] > max {
+            max = slice[i];
+            maxid = i;
         }
     }
-    //println!("joltage: {}", joltage);
-    joltage
+    (max, maxid)
 }
