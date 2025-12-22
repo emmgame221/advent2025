@@ -32,6 +32,29 @@ fn part1(lines: &Vec<String>) -> u64 {
 
 fn part2(lines: &Vec<String>) -> u64 {
     let mut count = 0;
+    let mut graph: Vec<Vec<char>> = Vec::new();
+    for line in lines {
+        graph.push(line.chars().collect());
+    }
+    loop {
+        //print_graph(&graph);
+        let mut unchanged = true;
+        for i in 0..graph.len() {
+            for j in 0..graph[i].len() {
+                if graph[i][j] == '@' {
+                    if count_neighbors(&graph, i, j) < 4 {
+                        count += 1;
+                        graph[i][j] = '.';
+                        unchanged = false;
+                    }
+                }
+            }
+        }
+        //print_graph(&graph);
+        if unchanged {
+            break;
+        }
+    }
     count
 }
 
@@ -81,4 +104,15 @@ fn count_neighbors(graph: &Vec<Vec<char>>, i: usize, j: usize) -> u32 {
         }
     }
     count
+}
+
+#[allow(dead_code)]
+fn print_graph(graph: &Vec<Vec<char>>) {
+    for row in graph {
+        for col in row {
+            print!("{}", col);
+        }
+        println!();
+    }
+    println!();
 }
