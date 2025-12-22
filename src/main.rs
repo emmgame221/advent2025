@@ -30,6 +30,9 @@ fn main() {
                 "4" => {
                     day4::print_solution();
                 }
+                "5" => {
+                    day5::print_solution();
+                }
                 _ => {
                     println!("Unknown Problem")
                 }
@@ -43,8 +46,8 @@ fn run_all() {
     day2::print_solution();
     day3::print_solution();
     day4::print_solution();
-    /*day5::print_solution();
-    day6::print_solution();
+    day5::print_solution();
+    /*day6::print_solution();
     day7::print_solution();
     day8::print_solution();
     day9::print_solution();
