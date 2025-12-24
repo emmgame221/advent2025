@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 pub fn print_solution() {
-    let input = File::open("inputs/day7test.txt").unwrap();
+    let input = File::open("inputs/day7.txt").unwrap();
     let lines = BufReader::new(input).lines();
     let lines: Vec<String> = lines.map(|x| x.unwrap()).collect();
     let p1 = part_one(&lines);
@@ -48,13 +48,13 @@ fn part_two(lines: &[String]) -> u64 {
                 'S' => beams[row][col] = 1,
                 '^' => {
                     if beams[row - 1][col] > 0 {
-                        beams[row][col - 1] += beams[row - 1][col] + beams[row - 1][col - 1];
-                        beams[row][col + 1] += beams[row - 1][col] + beams[row - 1][col + 1];
+                        beams[row][col - 1] = beams[row - 1][col] + beams[row][col - 1];
+                        beams[row][col + 1] = beams[row - 1][col] + beams[row][col + 1];
                     }
                 }
                 '.' => {
                     if row > 0 && beams[row - 1][col] > 0 {
-                        beams[row][col] = beams[row - 1][col];
+                        beams[row][col] += beams[row - 1][col];
                     }
                 }
                 _ => {}
@@ -62,7 +62,7 @@ fn part_two(lines: &[String]) -> u64 {
         }
         //println!();
     }
-    print_beams(&beams);
+    //print_beams(&beams);
     beams[beams.len() - 1].iter().sum::<u64>()
 }
 
@@ -70,7 +70,7 @@ fn part_two(lines: &[String]) -> u64 {
 fn print_beams(beams: &Vec<Vec<u64>>) {
     for line in beams {
         for i in line {
-            print!("{:X}", i);
+            print!("{:3X}", i);
         }
         println!();
     }
