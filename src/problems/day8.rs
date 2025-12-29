@@ -7,21 +7,21 @@ pub fn print_solution() {
     let input = File::open("inputs/day8.txt").unwrap();
     let lines = BufReader::new(input).lines();
     let lines: Vec<String> = lines.map(|x| x.unwrap()).collect();
-    let p1 = part_one(&lines);
-    println!("Day 8 Part 1: {}", p1);
-    //let p2 = part_two(&lines);
-    //println!("Day 8 Part 2: {}", p2);
-}
-
-fn part_one(lines: &[String]) -> usize {
     let mut points: Vec<Point3d> = vec![];
     for line in lines {
-        let point = match Point3d::from_str(line) {
+        let point = match Point3d::from_str(&line) {
             Ok(p) => p,
             Err(e) => panic!("{}", e),
         };
         points.push(point);
     }
+    let p1 = part_one(&points);
+    println!("Day 8 Part 1: {}", p1);
+    let p2 = part_two(&points);
+    println!("Day 8 Part 2: {}", p2);
+}
+
+fn part_one(points: &Vec<Point3d>) -> usize {
     let mut circuits: Vec<HashSet<&Point3d>> = vec![];
     //println!("{:?}", points);
     for pair in points
@@ -72,6 +72,50 @@ fn part_one(lines: &[String]) -> usize {
         .take(3)
         .map(|s| s.len())
         .product()
+}
+
+fn part_two(points: &Vec<Point3d>) -> u64 {
+    let mut circuits: Vec<HashSet<&Point3d>> = vec![];
+    let mut iter = points.iter().combinations(2).sorted_by(|p1, p2| {
+        Ord::cmp(
+            &Point3d::distance_squared(p1[0], p1[1]),
+            &Point3d::distance_squared(p2[0], p2[1]),
+        )
+    });
+    while let Some(pair) = iter.next() {
+        if !circuits
+            .iter()
+            .any(|c| c.contains(pair[0]) || c.contains(pair[1]))
+        {
+            let mut set = HashSet::new();
+            set.insert(pair[0]);
+            set.insert(pair[1]);
+            circuits.push(set);
+        } else {
+            for circuit in circuits.iter_mut() {
+                if circuit.iter().contains(&pair[0]) || circuit.iter().contains(&pair[1]) {
+                    circuit.insert(pair[0]);
+                    circuit.insert(pair[1]);
+                }
+            }
+        }
+        for i in 0..circuits.len() {
+            for j in i + 1..circuits.len() {
+                let mut s1 = circuits[i].clone();
+                let s2 = &circuits[j];
+                if s1.intersection(s2).count() > 0 {
+                    s1.extend(s2.iter());
+                    circuits[i] = s1;
+                    circuits[j] = HashSet::new();
+                }
+            }
+        }
+        if circuits.iter().any(|c| c.len() == 1000) {
+            return pair[0].x * pair[1].x;
+        }
+    }
+
+    0
 }
 
 #[derive(Debug, Default, Eq, Hash, PartialEq, Clone)]
