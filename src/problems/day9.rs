@@ -5,7 +5,7 @@ use std::{
 };
 
 pub fn print_solution() {
-    let input = File::open("inputs/day9test.txt").unwrap();
+    let input = File::open("inputs/day9.txt").unwrap();
     let lines = BufReader::new(input).lines();
     let lines: Vec<String> = lines.map(|x| x.unwrap()).collect();
     let mut red_tiles: Vec<Point2d> = vec![];
@@ -107,14 +107,15 @@ fn part_two(red_tiles: &[Point2d]) -> u64 {
         }
     }
     for row in 0..grid.len() {
-        for col in 0..grid.len() {
-            if inside(col, row, &grid) {
+        for col in 0..grid[row].len() {
+            if !grid[row][col] && inside(col, row, &grid) {
                 grid[row][col] = true;
             }
         }
     }
+
     let grid = grid;
-    print_grid(&grid);
+    //print_grid(&grid, red_tiles);
     let last = pairs
         .iter()
         .sorted_by(|pair1, pair2| {
@@ -128,31 +129,64 @@ fn part_two(red_tiles: &[Point2d]) -> u64 {
 fn inside(x: usize, y: usize, grid: &Vec<Vec<bool>>) -> bool {
     if grid[y][x] {
         true
-    } else if x == 0 {
-        false
-    } else if x == grid[0].len() - 1 {
-        false
-    } else if y == 0 {
-        false
-    } else if y == grid.len() - 1 {
-        false
     } else {
-        inside(x - 1, y - 1, grid)
-            && inside(x - 1, y, grid)
-            && inside(x - 1, y + 1, grid)
-            && inside(x, y - 1, grid)
-            && inside(x, y + 1, grid)
-            && inside(x + 1, y - 1, grid)
-            && inside(x + 1, y, grid)
-            && inside(x + 1, y + 1, grid)
+        let mut col = x;
+        let mut any_left = false;
+        while col > 0 {
+            // This misses the 0th column, but there are no 0s in the input
+            if grid[y][col] {
+                any_left = true;
+                break;
+            }
+            col -= 1;
+        }
+        let mut any_right = false;
+        col = x;
+        while col < grid[y].len() {
+            if grid[y][col] {
+                any_right = true;
+                break;
+            }
+            col += 1;
+        }
+        let mut row = y;
+        let mut any_up = false;
+        while row > 0 {
+            if grid[row][x] {
+                any_up = true;
+                break;
+            }
+            row -= 1;
+        }
+        row = y;
+        let mut any_down = false;
+        while row < grid.len() {
+            if grid[row][x] {
+                any_down = true;
+                break;
+            }
+            row += 1;
+        }
+        any_left && any_right && any_up && any_down
     }
 }
 
 #[allow(dead_code)]
-fn print_grid(grid: &Vec<Vec<bool>>) {
-    for row in grid {
-        for col in row {
-            let c = if *col { 'X' } else { '.' };
+fn print_grid(grid: &Vec<Vec<bool>>, red_tiles: &[Point2d]) {
+    println!("Width: {}, Height: {}", grid[0].len(), grid.len());
+    for (y, row) in grid.iter().enumerate() {
+        for (x, col) in row.iter().enumerate() {
+            let current_tile = Point2d {
+                x: x as u64,
+                y: y as u64,
+            };
+            let c = if red_tiles.contains(&current_tile) {
+                '#'
+            } else if *col {
+                'X'
+            } else {
+                '.'
+            };
             print!("{}", c);
         }
         println!();
