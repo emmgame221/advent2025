@@ -61,22 +61,6 @@ fn part_one(red_tiles: &[Point2d]) -> u64 {
     rect_area(largest.0, largest.1)
 }
 
-fn rect_area2(p1: &Point2d, p2: &Point2d, grid: &Vec<Vec<bool>>) -> u64 {
-    let min_x = p1.x.min(p2.x);
-    let min_y = p1.y.min(p2.y);
-    let max_x = p1.x.max(p2.x);
-    let max_y = p1.y.max(p2.y);
-    let area = (max_x - min_x + 1) * (max_y - min_y + 1);
-    for x in min_x..=max_x {
-        for y in min_y..=max_y {
-            if !grid[y as usize][x as usize] {
-                return 0;
-            }
-        }
-    }
-    area
-}
-
 fn part_two(red_tiles: &[Point2d]) -> u64 {
     let pairs: Vec<(&Point2d, &Point2d)> = red_tiles.iter().tuple_combinations().collect();
     let max_width = red_tiles
@@ -106,24 +90,39 @@ fn part_two(red_tiles: &[Point2d]) -> u64 {
             }
         }
     }
-    for row in 0..grid.len() {
-        for col in 0..grid[row].len() {
-            if !grid[row][col] && inside(col, row, &grid) {
-                grid[row][col] = true;
-            }
+
+    // This part is too slow to do on the real input
+    // fill_grid(&mut grid);
+
+    // print_grid(&grid, red_tiles);
+    let mut list = pairs
+        .iter()
+        .sorted_by(|pair1, pair2| rect_area(pair1.0, pair1.1).cmp(&rect_area(pair2.0, pair2.1)))
+        .rev();
+    while let Some((p1, p2)) = list.next() {
+        if check_valid_rect(&p1, &p2, &grid) {
+            return rect_area(p1, p2);
         }
     }
+    0
+}
 
-    let grid = grid;
-    //print_grid(&grid, red_tiles);
-    let last = pairs
-        .iter()
-        .sorted_by(|pair1, pair2| {
-            rect_area2(pair1.0, pair1.1, &grid).cmp(&rect_area2(pair2.0, pair2.1, &grid))
-        })
-        .last()
-        .unwrap();
-    rect_area2(last.0, last.1, &grid)
+fn check_valid_rect(p1: &Point2d, p2: &Point2d, grid: &Vec<Vec<bool>>) -> bool {
+    let min_y = p1.y.min(p2.y) as usize;
+    let min_x = p1.x.min(p2.x) as usize;
+    let max_y = p1.y.max(p2.y) as usize;
+    let max_x = p1.x.max(p2.x) as usize;
+    let center_x = min_x + ((max_x - min_x) / 2);
+    let center_y = min_y + ((max_y - min_y) / 2);
+    inside(min_x, min_y, grid)
+        && inside(min_x, max_y, grid)
+        && inside(max_x, min_y, grid)
+        && inside(max_x, max_y, grid)
+        && inside(center_x, center_y, grid)
+        && inside(center_x, min_y, grid)
+        && inside(center_x, max_y, grid)
+        && inside(min_x, center_y, grid)
+        && inside(max_x, center_y, grid)
 }
 
 fn inside(x: usize, y: usize, grid: &Vec<Vec<bool>>) -> bool {
@@ -167,7 +166,8 @@ fn inside(x: usize, y: usize, grid: &Vec<Vec<bool>>) -> bool {
             }
             row += 1;
         }
-        any_left && any_right && any_up && any_down
+        let inside = any_left && any_right && any_up && any_down;
+        inside
     }
 }
 
@@ -192,4 +192,15 @@ fn print_grid(grid: &Vec<Vec<bool>>, red_tiles: &[Point2d]) {
         println!();
     }
     println!();
+}
+
+#[allow(dead_code)]
+fn fill_grid(grid: &mut Vec<Vec<bool>>) {
+    for row in 0..grid.len() {
+        for col in 0..grid[row].len() {
+            if !grid[row][col] && inside(col, row, grid) {
+                grid[row][col] = true;
+            }
+        }
+    }
 }
